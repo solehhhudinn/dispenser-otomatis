@@ -6,74 +6,12 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Status Pompa</title>
     <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
             background-color: #f4f4f9;
-        }
-        h1 {
-            color: #333;
-            text-align: center;
-        }
-        .container {
-            text-align: center;
-        }
-        .dispenser-logo img {
-            width: 100px;
-            margin-bottom: 20px;
-        }
-        table {
-            width: 70%;
-            margin: 20px auto;
-            border-collapse: collapse;
-            background: #fff;
-            box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
-        }
-        th, td {
-            padding: 15px;
-            text-align: center;
-            border: 1px solid #ddd;
-        }
-        th {
-            background-color: #007bff;
-            color: #fff;
-        }
-        tr:hover {
-            background-color: #f1f1f1;
-        }
-        .status-on {
-            color: green;
-            font-weight: bold;
-        }
-        .status-off {
-            color: red;
-            font-weight: bold;
-        }
-        .indicator {
-            margin: 20px auto;
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-        }
-        .indicator div {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            line-height: 50px;
-            color: white;
-            font-weight: bold;
-            text-align: center;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-        }
-        .hot {
-            background-color: red;
-        }
-        .warm {
-            background-color: orange;
-        }
-        .cold {
-            background-color: blue;
         }
         .controls {
             margin: 20px auto;
@@ -94,64 +32,94 @@
         }
 
         .glass {
-            width: 150px;
-            height: 300px;
-            border: 5px solid #000;
-            border-radius: 10px;
+            width: 200px;
+            height: 350px;
+            border-left: 4px solid rgb(54, 54, 54);
+            border-right: 4px solid rgb(54, 54, 54);
+            border-bottom: 4px solid rgb(54, 54, 54);
+            border-bottom-left-radius: 50px;
+            border-bottom-right-radius: 50px;
             position: relative;
             overflow: hidden;
             margin: 20px auto;
-            background-color: #e0e0e0;
+            background-color: whitesmoke;
         }
 
         .water {
             width: 100%;
             position: absolute;
             bottom: 0;
-            background: linear-gradient(180deg, #00aaff, #0066cc);
-            transition: height 1s ease-in-out; /* Tambahkan durasi transisi */
+            background: linear-gradient(180deg, #00aaff, #0152a4);
+            transition: height 1s ease-in-out;
         }
 
     </style>
 </head>
 <body>
+    <nav class="bg-white fixed w-full z-20 top-0 start-0 border-b border-gray-200">
+        <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
+        <a href="/pump-status" class="flex items-center space-x-3 rtl:space-x-reverse">
+            <img src="{{asset('logo.jpg')}}" class="w-[35px]"  alt="Flowbite Logo">
+            <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">Smart Dispenser</span>
+        </a>
+        <div class="flex md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
+            <div class="text-gray-400">Kelompok 3 IOT</div>
+        </div>
+        </div>
+      </nav>
     <h1>Pantau Status Pompa</h1>
-    <div class="container">
-        <!-- Logo Dispenser -->
-        <div class="dispenser-logo">
-            <div class="glass">
-                <div class="water" id="water"></div>
-            </div>           
-        </div>
+    <div class="max-w-screen-xl mx-auto p-4">
+        <div class="bg-white rounded-xl p-10 mt-20" style="border: 1px solid rgb(232, 232, 232)">
+            <div class="grid grid-cols-12 gap-4">
+                <div class="col-span-5 p-4 text-white">
+                    <div class="dispenser-logo">
+                        <div class="glass">
+                            <div class="water" id="water"></div>
+                        </div>           
+                    </div>
+                </div>
+                <div class="col-span-7 p-4">
+                    <h5 class="mb-3 mt-5">Status</h5>
+                    <span class="{{ $status['pumpStatus'] === 'ON' ? 'text-green-600 bg-green-100' : 'text-red-600 bg-red-100' }} px-5 py-2 text-4xl font-semibold rounded-xl">                        
+                        {{ htmlspecialchars($status['pumpStatus'], ENT_QUOTES, 'UTF-8') }}
+                    </span>
+                    <div class="text-lg mt-10 mb-2">
+                        Jarak (cm) : <b>{{ htmlspecialchars($status['distance'], ENT_QUOTES, 'UTF-8') }} cm</b>
+                    </div>              
+                    <div class="bg-white p-4 text-center rounded-xl w-[300px] mb-4" style="border: 1px solid rgb(232, 232, 232)">
+                        <label for="temperature" class="text-gray-400 text-sm">Atur Suhu:</label><br>
+                        <p id="temperature" class="font-semibold text-3xl"><span id="tempValue">50</span>°C</p>
+                    </div>
+                    <button type="button" class="hot text-white bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 shadow-lg shadow-red-500/50 dark:shadow-lg dark:shadow-red-800/80 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">Panas</button>
+                    <button type="button" class="normal text-white bg-gradient-to-r from-gray-400 via-gray-500 to-gray-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-gray-300 dark:focus:ring-gray-800 shadow-lg shadow-gray-500/50 dark:shadow-lg dark:shadow-gray-800/80 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">Normal</button>
+                    <button type="button" class="cold text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 shadow-lg shadow-blue-500/50 dark:shadow-lg dark:shadow-blue-800/80 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 ">Dingin</button>                           
+                </div>
+            </div>
 
-        <!-- Tabel Status -->
-        <table>
-            <tr>
-                <th>Status</th>
-                <th>Jarak (cm)</th>
-            </tr>
-            <tr>
-                {{-- Untuk mencegah Kerentanan XSS --}}
-                <td class="{{ $status['pumpStatus'] === 'ON' ? 'status-on' : 'status-off' }}">
-                    {{ htmlspecialchars($status['pumpStatus'], ENT_QUOTES, 'UTF-8') }}
-                </td>
-                <td>{{ htmlspecialchars($status['distance'], ENT_QUOTES, 'UTF-8') }} cm</td>                
-            </tr>
-        </table>
+            {{-- <table>
+                <tr>
+                    <th>Status</th>
+                    <th>Jarak (cm)</th>
+                </tr>
+                <tr>
+                    <td class="{{ $status['pumpStatus'] === 'ON' ? 'status-on' : 'status-off' }}">
+                        {{ htmlspecialchars($status['pumpStatus'], ENT_QUOTES, 'UTF-8') }}
+                    </td>
+                    <td>{{ htmlspecialchars($status['distance'], ENT_QUOTES, 'UTF-8') }} cm</td>                
+                </tr>
+            </table>
 
-        <!-- Tombol Kontrol Manual -->
-        <div class="indicator">
-            <button class="hot">Panas</button>
-            <button class="normal">Normal</button>
-            <button class="cold">Dingin</button>
-        </div>
+            <div class="indicator">
+                <button class="hot">Panas</button>
+                <button class="normal">Normal</button>
+                <button class="cold">Dingin</button>
+            </div>
 
-        <!-- Slider untuk Mengatur Suhu -->
-        <div class="slider-container">
-            <label for="temperature">Atur Suhu:</label><br>
-            <p id="temperature">Suhu: <span id="tempValue">50</span>°C</p>
+            <div class="slider-container">
+                <label for="temperature">Atur Suhu:</label><br>
+                <p id="temperature">Suhu: <span id="tempValue">50</span>°C</p>
+            </div> --}}
         </div>
-        
     </div>
 
     <script src="https://js.pusher.com/7.2/pusher.min.js"></script>
